@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { BsThreeDotsVertical } from "react-icons/bs";
 
 const Profile = () => {
   const { id } = useParams();
@@ -19,7 +20,7 @@ const Profile = () => {
       );
       setProfile(data.foodPartner);
       setVideos(data.foodPartner.foodItem || []);
-      console.log(data.foodPartner.foodItem);
+      // console.log(data.foodPartner.foodItem);
     } catch (err) {
       console.error(err);
     }
@@ -30,25 +31,27 @@ const Profile = () => {
   return (
     <div className="h-auto w-full">
       {/* Profile Header */}
-      <div className="h-54 w-full bg-gray-400 flex flex-col justify-center px-6 sticky top-0 left-0 z-10">
-        <div className="flex items-center gap-8">
-          <div className="w-34 h-34 rounded-full bg-gray-200 flex justify-center items-center">
+      <div className="h-34 w-full bg-blue-950 flex justify-center items-center px-6 sticky top-0 left-0 z-10">
+        <div className="flex w-[98%] h-[95%] items-center">
+          <div className="w-1/2 h-full flex justify-start items-center gap-8">
             <img
-              className="w-32 h-32 rounded-full "
+              className="size-24 rounded-full"
               src="https://plus.unsplash.com/premium_photo-1690407617542-2f210cf20d7e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D"
               alt="profile.jpg"
             />
-          </div>
-          <div className="flex flex-col gap-2">
-            <div className="font-semibold text-blue-900 text-xl">
-              {profile.name}
+            <div className="flex flex-col gap-2">
+              <p className="font-semibold text-white text-xl">{profile.name}</p>
+              <p className="text-sm text-white">{profile.address}</p>
             </div>
-            <div className="text-md text-blue-600">{profile.address}</div>
           </div>
-        </div>
-        <div className="flex justify-around mt-4">
-          <p className="text-lg text-blue-900">Total meals</p>
-          <p className="text-lg text-blue-900">Customer services</p>
+          <div className="w-1/2 h-full flex justify-end items-start relative group">
+            <div className="bg-yellow-400">
+              <BsThreeDotsVertical className="text-xl text-white cursor-pointer" />
+            </div>
+            <div className="h-8 w-20 bg-white absolute top-8 right-0 hidden group-hover:block rounded-md">
+              <p className="text-center cursor-pointer pt-10">Logout</p>
+            </div>
+          </div>
         </div>
       </div>
 

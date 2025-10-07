@@ -2,9 +2,19 @@ const userModel = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const foodPartnerModel = require("../models/foodpartner.model");
+const storageService = require("../services/storage.service");
+const { v4: uuid } = require("uuid");
 
 async function registerUser(req, res) {
   const { fullName, email, password } = req.body;
+  const file = req.file;
+  console.log(file);
+
+  const fileUploadResult = await storageService.uploadFile(
+    req.file.buffer,
+    uuid()
+  );
+  console.log(fileUploadResult);
 
   const isUserAlreadyExist = await userModel.findOne({ email });
 
@@ -20,6 +30,7 @@ async function registerUser(req, res) {
     fullName,
     email,
     password: hashedPassword,
+    image: fileUploadResult.url,
   });
 
   const token = jwt.sign(
@@ -37,6 +48,7 @@ async function registerUser(req, res) {
       _id: user._id,
       email: user.email,
       fullName: user.fullName,
+      image: user.image,
     },
   });
 }
@@ -78,6 +90,26 @@ async function loginUser(req, res) {
     },
   });
 }
+
+const getUserById = async (req, res) => {
+  const userId = req.user._id;
+  console.log(userId);
+
+  const isUserExist = await userModel.findOne({
+    _id: userId,
+  });
+  if (!isUserExist) {
+    return res.status(404).json({
+      success: false,
+      message: "User Not Found",
+    });
+  }
+  return res.status(200).json({
+    success: true,
+    message: "User get successfully",
+    isUserExist,
+  });
+};
 
 async function logoutUser(req, res) {
   res.clearCookie("token");
@@ -183,4 +215,5 @@ module.exports = {
   registerFoodPartner,
   loginFoodPartner,
   logoutFoodPartner,
+  getUserById,
 };

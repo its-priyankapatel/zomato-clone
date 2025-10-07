@@ -1,37 +1,49 @@
 import axios from "axios";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AiOutlineHeart } from "react-icons/ai";
 import { IoBookmarkOutline } from "react-icons/io5";
 import { FaCommentDots } from "react-icons/fa";
 import { RiHomeLine } from "react-icons/ri";
-import { FaBookmark } from "react-icons/fa";
 import { PiBookmarkSimpleFill } from "react-icons/pi";
 import { PiBookmarkSimple } from "react-icons/pi";
-import { RxHeartFilled } from "react-icons/rx";
-import { RxHeart } from "react-icons/rx";
 
-const Home = () => {
-  const [videos, setVideos] = useState([]);
+const Saved = () => {
+  const [savedVideos, setSavedVideos] = useState([]);
   const videoRefs = useRef([]);
   const navigate = useNavigate();
 
-  const fetchVideos = async () => {
+  const fetchSaved = async () => {
     try {
-      const { data } = await axios.get("http://localhost:3000/api/food/", {
-        withCredentials: true,
-      });
-      setVideos(data.foodItems || 0);
-      console.log(data);
-
-      console.log(data.foodItems);
+      const { data } = await axios.get(
+        "http://localhost:3000/api/food/get/saved-video",
+        {
+          withCredentials: true,
+        }
+      );
+      console.log(data.savedFood);
+      setSavedVideos(data.savedFood || []);
     } catch (error) {
-      console.log(error);
+      console.log("Error in get saved videos");
+    }
+  };
+
+  const handleUnSaveVideo = async (foodId) => {
+    try {
+      const { data } = await axios.delete(
+        `http://localhost:3000/api/food/delete-saved/${foodId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      console.log(data);
+      setSavedVideos((prev) => prev.filter((v) => v._id !== foodId));
+    } catch (error) {
+      console.log("Error in delete saved video");
     }
   };
 
   useEffect(() => {
-    fetchVideos();
+    fetchSaved();
   }, []);
 
   useEffect(() => {
@@ -40,80 +52,23 @@ const Home = () => {
         if (!video) return;
         const rect = video.getBoundingClientRect();
         const inView = rect.top >= 0 && rect.bottom <= window.innerHeight + 200;
-        if (inView) {
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
+        if (inView) video.play().catch(() => {});
+        else video.pause();
       });
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const likeVideo = async (foodId) => {
-    try {
-      const { data } = await axios.post(
-        "http://localhost:3000/api/food/like",
-        { foodId },
-        { withCredentials: true }
-      );
-
-      if (data.like) {
-        console.log("video liked");
-        setVideos((prev) =>
-          prev.map((v) =>
-            v._id === foodId ? { ...v, likeCount: v.likeCount + 1 } : v
-          )
-        );
-      } else {
-        console.log("video unliked");
-        setVideos((prev) =>
-          prev.map((v) =>
-            v._id === foodId ? { ...v, likeCount: v.likeCount - 1 } : v
-          )
-        );
-      }
-    } catch (error) {
-      console.log("Error in save data");
-    }
-  };
-
-  const handleSaveVideo = async (foodId) => {
-    try {
-      const { data } = await axios.post(
-        "http://localhost:3000/api/food/save",
-        { foodId },
-        { withCredentials: true }
-      );
-
-      setVideos((prevVideos) =>
-        prevVideos.map((v) =>
-          v._id === foodId
-            ? { ...v, saveCount: data.saveStatus } // 0 or 1
-            : v
-        )
-      );
-
-      console.log(data.saveStatus ? "Video saved" : "Video unsaved");
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const savedVideos = videos.filter((v) => v.saveCount === 1);
-
   return (
     <>
       <div className="h-screen w-full overflow-y-scroll snap-y snap-mandatory">
-        {videos.map((item, index) => (
+        {savedVideos.map((item, index) => (
           <section
             key={index}
-            className="h-screen flex flex-col items-center snap-start bg-gray-300"
+            className="h-screen flex flex-col  items-center snap-start bg-gray-300"
           >
-            <div className="relative w-full h-[93%] max-w-md max-h-screen">
-              {/* Video */}
+            <div className="relative h-[93%] w-full max-w-md max-h-screen">
               <video
                 ref={(el) => {
                   if (el) {
@@ -122,52 +77,37 @@ const Home = () => {
                   }
                 }}
                 src={item.video}
-                className="h-full w-full object-cover rounded-xs"
+                className="h-full w-full object-cover rounded-sm"
                 muted
                 loop
                 playsInline
                 preload="meta-data"
               />
 
-              {/* Right side actions */}
+              {/* Right side actions (only save + comments) */}
               <div className="absolute right-3 bottom-28 flex flex-col items-center gap-6 text-white">
                 <div className="flex flex-col items-center gap-1">
-                  {item.likeCount === 1 ? (
-                    <RxHeartFilled
-                      onClick={() => likeVideo(item._id)}
-                      className="text-2xl cursor-pointer text-red-600"
-                    />
-                  ) : (
-                    <RxHeart
-                      onClick={() => likeVideo(item._id)}
-                      className="text-2xl cursor-pointer "
-                    />
-                  )}
-                </div>
-
-                <div className="flex flex-col items-center gap-1">
-                  {item.saveCount === 1 ? (
+                  {savedVideos.some((v) => v._id === item._id) ? (
                     <PiBookmarkSimpleFill
                       className="text-3xl cursor-pointer"
-                      onClick={() => handleSaveVideo(item._id)}
+                      onClick={() => handleUnSaveVideo(item._id)}
                     />
                   ) : (
                     <PiBookmarkSimple
                       className="text-3xl cursor-pointer"
-                      onClick={() => handleSaveVideo(item._id)}
+                      onClick={() => handleUnSaveVideo(item._id)}
                     />
                   )}
                 </div>
-
                 <div className="flex flex-col items-center gap-1">
                   <FaCommentDots className="text-2xl cursor-pointer" />
                   <span className="text-xs">{item.comments?.length || 0}</span>
                 </div>
               </div>
 
-              {/* Bottom content (description + button) */}
+              {/* Bottom content */}
               <div className="absolute bottom-5 left-5 text-white flex flex-col gap-1">
-                <h2 className="text-xs text-black">{item.description}</h2>
+                <h2 className="text-md text-black">{item.description}</h2>
                 <button
                   onClick={() => navigate(`/food-partner/${item.foodPartner}`)}
                   className="mt-2 h-7 w-18 bg-gray-200 text-blue-950 text-bold rounded-sm text-xs cursor-pointer border-2 border-blue-950 hover:bg-gray-400 hover:text-white"
@@ -179,7 +119,6 @@ const Home = () => {
           </section>
         ))}
       </div>
-      {/* Bottom navigation bar */}
       <div className="fixed bottom-0 left-133 h-14 w-[29.5%] bg-blue-950 flex justify-around items-center text-white rounded-xs z-20">
         <div
           className="flex flex-col items-center cursor-pointer"
@@ -197,9 +136,8 @@ const Home = () => {
           <span className="text-xs">Saved</span>
         </div>
       </div>
-      {/* <Saved saved={savedVideos} /> */}
     </>
   );
 };
 
-export default Home;
+export default Saved;

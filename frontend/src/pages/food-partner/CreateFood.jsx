@@ -1,11 +1,14 @@
 import axios from "axios";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const CreateFood = () => {
   const [foodName, setFoodName] = useState("");
   const [description, setDescription] = useState("");
   const [videoFile, setVideoFile] = useState(null);
   const [preview, setPreview] = useState(null);
+
+  const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -31,6 +34,7 @@ const CreateFood = () => {
       { withCredentials: true }
     );
     console.log(data);
+    navigate("/");
   };
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-blue-50 flex justify-center items-center p-4">

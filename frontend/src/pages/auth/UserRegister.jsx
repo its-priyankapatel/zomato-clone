@@ -27,7 +27,7 @@ const userRegister = () => {
           withCredentials: true,
         }
       );
-      console.log(data);
+
       setFirstName("");
       setLastName("");
       setEmail("");
@@ -121,7 +121,7 @@ const userRegister = () => {
               <p className="text-center">
                 Already have a account?{" "}
                 <span
-                  className="text-blue-900 cursor-pointer"
+                  className="text-blue-900 cursor-pointer hover:border-b-2"
                   onClick={() => navigate("/user/login")}
                 >
                   Sign in

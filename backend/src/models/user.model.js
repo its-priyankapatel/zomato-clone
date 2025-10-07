@@ -14,6 +14,9 @@ const userSchema = mongoose.Schema(
     password: {
       type: String,
     },
+    image: {
+      type: String,
+    },
   },
   {
     timestamps: true,

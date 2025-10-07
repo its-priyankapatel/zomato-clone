@@ -22,7 +22,6 @@ const UserLogin = () => {
         },
         { withCredentials: true }
       );
-      console.log(data);
 
       setEmail("");
       setPassword("");
